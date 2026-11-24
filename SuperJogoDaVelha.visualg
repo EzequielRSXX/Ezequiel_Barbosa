@@ -28,7 +28,7 @@ var
   i, k, p1, p2, p3, tb, base, casa, subtab: inteiro
   acabou, valido, ok, terminou, achou, empatou, temX, temO: logico
 
-  // Testa se simAtual fez 3 em linha no tabuleiro tb -> resultado em achou
+// Testa se simAtual fez 3 em linha no tabuleiro tb -> resultado em achou
 
 procedimento checaVenceu
   inicio
@@ -77,7 +77,7 @@ procedimento mostraTab
     escreval("")
     para k de 0 ate 2 faca
 
-      // casa vazia mostra o numero dela
+// casa vazia mostra o numero dela
 
       s1 <- quadro[base+k*3+1]
       se s1 = " " entao
@@ -99,9 +99,13 @@ procedimento mostraTab
 fimprocedimento
 
 // Joga a partida do subtabuleiro tb. Quem comeca e o jogador que escolheu.
+
 procedimento jogaSub
+
   inicio
-    // partida nova: limpa o subtabuleiro (importante se ele tinha dado velha antes)
+    
+// partida nova: limpa o subtabuleiro (importante se ele tinha dado velha antes)
+
     para casa de 1 ate 9 faca
       quadro[tb*9+casa] <- " "
     fimpara
@@ -156,7 +160,9 @@ procedimento jogaSub
 fimprocedimento
 
 inicio
+
   // ---------- inicializacao ----------
+
   para i de 1 ate 90 faca
     quadro[i] <- " "
   fimpara
@@ -172,6 +178,7 @@ inicio
   numeros[9] <- "9"
 
   // linhas 1 a 3 (horizontais)
+ 
   trio[1] <- 1
   trio[2] <- 2
   trio[3] <- 3
@@ -181,7 +188,9 @@ inicio
   trio[7] <- 7
   trio[8] <- 8
   trio[9] <- 9
+  
   // linhas 4 a 6 (verticais)
+  
   trio[10] <- 1
   trio[11] <- 4
   trio[12] <- 7
@@ -191,7 +200,9 @@ inicio
   trio[16] <- 3
   trio[17] <- 6
   trio[18] <- 9
+  
   // linhas 7 e 8 (diagonais)
+  
   trio[19] <- 1
   trio[20] <- 5
   trio[21] <- 9
@@ -200,6 +211,7 @@ inicio
   trio[24] <- 7
 
   // ---------- jogo ----------
+  
   jogador <- "X"
   vencedor <- " "
   acabou <- falso
@@ -216,7 +228,9 @@ inicio
       se (subtab < 1) ou (subtab > 9) entao
         escreval("Numero invalido.")
       senao
-        // tabuleiro grande: posicao = numero do subtabuleiro
+        
+// tabuleiro grande: posicao = numero do subtabuleiro
+        
         se quadro[subtab] <> " " entao
           escreval("Esse subtabuleiro ja foi conquistado.")
         senao
@@ -228,7 +242,8 @@ inicio
     tb <- subtab
     jogaSub
 
-    // fim do jogo grande
+// fim do jogo grande
+    
     tb <- 0
     simAtual <- "X"
     checaVenceu
@@ -249,7 +264,8 @@ inicio
       fimse
     fimse
 
-    // o outro jogador quem escolhe o proximo subtabuleiro
+// o outro jogador quem escolhe o proximo subtabuleiro
+    
     se jogador = "X" entao
       jogador <- "O"
     senao
