@@ -1,0 +1,268 @@
+algoritmo "SuperJogoDaVelha"
+
+// FATEC Barueri - Algoritmos
+// Professor: Vander Ribeiro (o melhor professor da historia)
+// Tabuleiros: 0 = tabuleiro grande, 1 a 9 = subtabuleiros
+
+// Casas de cada tabuleiro:  1 2 3 / 4 5 6 / 7 8 9
+
+// quadro[1..90]: guarda X, O ou " ".  posicao = (tb * 9) + casa
+//    tabuleiro grande -> posicoes 1 a 9 (posicao = numero do subtabuleiro)
+//    subtabuleiro 1   -> posicoes 10 a 18 ... subtabuleiro 9 -> 82 a 90
+// trio[1..24]: as 8 linhas vencedoras, 3 casas cada.
+
+
+// "Entradas" dos procedimentos (variaveis globais):
+//    tb       = tabuleiro a ser usado (0 a 9)
+//    simAtual = simbolo a testar (X ou O)
+
+// "Saidas":
+//    achou    = verdadeiro se simAtual fez 3 em linha em tb
+//    empatou  = verdadeiro se ninguem mais consegue ganhar em tb
+
+var
+  quadro: vetor[1..90] de caractere
+  trio: vetor[1..24] de inteiro
+  numeros: vetor[1..9] de caractere
+  jogador, vencedor, vez, simAtual, tecla, s1, s2, s3: caractere
+  i, k, p1, p2, p3, tb, base, casa, subtab: inteiro
+  acabou, valido, ok, terminou, achou, empatou, temX, temO: logico
+
+  // Testa se simAtual fez 3 em linha no tabuleiro tb -> resultado em achou
+
+procedimento checaVenceu
+  inicio
+    base <- tb * 9
+    achou <- falso
+    para k de 1 ate 8 faca
+      p1 <- trio[(k-1)*3+1]
+      p2 <- trio[(k-1)*3+2]
+      p3 <- trio[(k-1)*3+3]
+      se (quadro[base+p1] = simAtual) e (quadro[base+p2] = simAtual) e (quadro[base+p3] = simAtual) entao
+        achou <- verdadeiro
+      fimse
+    fimpara
+fimprocedimento
+
+// Testa se ninguem mais consegue ganhar no tabuleiro tb (velha antecipada)
+// Uma linha so esta "morta" se tiver X e O ao mesmo tempo -> resultado em empatou
+
+procedimento checaEmpate
+  inicio
+    base <- tb * 9
+    empatou <- verdadeiro
+    para k de 1 ate 8 faca
+      p1 <- trio[(k-1)*3+1]
+      p2 <- trio[(k-1)*3+2]
+      p3 <- trio[(k-1)*3+3]
+      temX <- (quadro[base+p1] = "X") ou (quadro[base+p2] = "X") ou (quadro[base+p3] = "X")
+      temO <- (quadro[base+p1] = "O") ou (quadro[base+p2] = "O") ou (quadro[base+p3] = "O")
+      se nao (temX e temO) entao
+        empatou <- falso
+      fimse
+    fimpara
+fimprocedimento
+
+// Desenha o tabuleiro tb (0 = grande, 1 a 9 = subtabuleiro)
+
+procedimento mostraTab
+  inicio
+    base <- tb * 9
+    limpatela
+    se tb = 0 entao
+      escreval("=== TABULEIRO GRANDE ===")
+    senao
+      escreval("=== SUBTABULEIRO ", tb, " ===")
+    fimse
+    escreval("")
+    para k de 0 ate 2 faca
+
+      // casa vazia mostra o numero dela
+
+      s1 <- quadro[base+k*3+1]
+      se s1 = " " entao
+        s1 <- numeros[k*3+1]
+      fimse
+      s2 <- quadro[base+k*3+2]
+      se s2 = " " entao
+        s2 <- numeros[k*3+2]
+      fimse
+      s3 <- quadro[base+k*3+3]
+      se s3 = " " entao
+        s3 <- numeros[k*3+3]
+      fimse
+      escreval(" ", s1, " | ", s2, " | ", s3)
+      se k < 2 entao
+        escreval("---+---+---")
+      fimse
+    fimpara
+fimprocedimento
+
+// Joga a partida do subtabuleiro tb. Quem comeca e o jogador que escolheu.
+procedimento jogaSub
+  inicio
+    // partida nova: limpa o subtabuleiro (importante se ele tinha dado velha antes)
+    para casa de 1 ate 9 faca
+      quadro[tb*9+casa] <- " "
+    fimpara
+    vez <- jogador
+    terminou <- falso
+    enquanto nao terminou faca
+      mostraTab
+      escreval("")
+      escreval("Vez de ", vez, ".")
+      ok <- falso
+      repita
+        escreva("Escolha a casa (1-9): ")
+        leia(casa)
+        se (casa < 1) ou (casa > 9) entao
+          escreval("Numero invalido.")
+        senao
+          se quadro[tb*9+casa] <> " " entao
+            escreval("Casa ocupada.")
+          senao
+            ok <- verdadeiro
+          fimse
+        fimse
+      ate ok
+      quadro[tb*9+casa] <- vez
+      simAtual <- vez
+      checaVenceu
+      se achou entao
+        quadro[tb] <- vez
+        mostraTab
+        escreval("")
+        escreval(vez, " conquistou o subtabuleiro ", tb, "!")
+        terminou <- verdadeiro
+      senao
+        checaEmpate
+        se empatou entao
+          mostraTab
+          escreval("")
+          escreval("Deu velha! O subtabuleiro ", tb, " continua vazio.")
+          terminou <- verdadeiro
+        senao
+          se vez = "X" entao
+            vez <- "O"
+          senao
+            vez <- "X"
+          fimse
+        fimse
+      fimse
+    fimenquanto
+    escreval("")
+    escreva("Pressione ENTER para continuar...")
+    leia(tecla)
+fimprocedimento
+
+inicio
+  // ---------- inicializacao ----------
+  para i de 1 ate 90 faca
+    quadro[i] <- " "
+  fimpara
+
+  numeros[1] <- "1"
+  numeros[2] <- "2"
+  numeros[3] <- "3"
+  numeros[4] <- "4"
+  numeros[5] <- "5"
+  numeros[6] <- "6"
+  numeros[7] <- "7"
+  numeros[8] <- "8"
+  numeros[9] <- "9"
+
+  // linhas 1 a 3 (horizontais)
+  trio[1] <- 1
+  trio[2] <- 2
+  trio[3] <- 3
+  trio[4] <- 4
+  trio[5] <- 5
+  trio[6] <- 6
+  trio[7] <- 7
+  trio[8] <- 8
+  trio[9] <- 9
+  // linhas 4 a 6 (verticais)
+  trio[10] <- 1
+  trio[11] <- 4
+  trio[12] <- 7
+  trio[13] <- 2
+  trio[14] <- 5
+  trio[15] <- 8
+  trio[16] <- 3
+  trio[17] <- 6
+  trio[18] <- 9
+  // linhas 7 e 8 (diagonais)
+  trio[19] <- 1
+  trio[20] <- 5
+  trio[21] <- 9
+  trio[22] <- 3
+  trio[23] <- 5
+  trio[24] <- 7
+
+  // ---------- jogo ----------
+  jogador <- "X"
+  vencedor <- " "
+  acabou <- falso
+
+  enquanto nao acabou faca
+    tb <- 0
+    mostraTab
+    escreval("")
+    escreval("Vez de ", jogador, " escolher o subtabuleiro (e comeca a partida nele).")
+    valido <- falso
+    repita
+      escreva("Subtabuleiro (1-9): ")
+      leia(subtab)
+      se (subtab < 1) ou (subtab > 9) entao
+        escreval("Numero invalido.")
+      senao
+        // tabuleiro grande: posicao = numero do subtabuleiro
+        se quadro[subtab] <> " " entao
+          escreval("Esse subtabuleiro ja foi conquistado.")
+        senao
+          valido <- verdadeiro
+        fimse
+      fimse
+    ate valido
+
+    tb <- subtab
+    jogaSub
+
+    // fim do jogo grande
+    tb <- 0
+    simAtual <- "X"
+    checaVenceu
+    se achou entao
+      vencedor <- "X"
+      acabou <- verdadeiro
+    senao
+      simAtual <- "O"
+      checaVenceu
+      se achou entao
+        vencedor <- "O"
+        acabou <- verdadeiro
+      senao
+        checaEmpate
+        se empatou entao
+          acabou <- verdadeiro
+        fimse
+      fimse
+    fimse
+
+    // o outro jogador quem escolhe o proximo subtabuleiro
+    se jogador = "X" entao
+      jogador <- "O"
+    senao
+      jogador <- "X"
+    fimse
+  fimenquanto
+
+  tb <- 0
+  mostraTab
+  escreval("")
+  se vencedor = " " entao
+    escreval("Fim de jogo: deu velha no tabuleiro grande!")
+  senao
+    escreval("Fim de jogo: ", vencedor, " venceu o Super Jogo da Velha!")
+  fimse
+fimalgoritmo
