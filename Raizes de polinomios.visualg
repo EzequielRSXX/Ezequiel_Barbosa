@@ -1,0 +1,315 @@
+algoritmo "Raizes de polinomios"
+
+// Algoritmos x Matematica Discreta
+// Professores: Vander Ribeiro e Henrique Furia
+// Raizes de polinomios de grau 1 ate 10 com coeficientes reais.
+// - Grau 1 e 2: formula direta (no grau 2 acha tambem raizes complexas)
+// - Grau 3 ou mais: metodo de Durand-Kerner (acha raizes reais e complexas)
+// - Opcao 2 do menu: multiplica dois polinomios e acha as raizes do produto
+// Obs.: nos vetores, a posicao k guarda o coeficiente de x^(k-1).
+// Digite numeros decimais com PONTO (ex.: 2.5).
+// Obs (2): o programa mostra as raizes em ordem crescente e com 4 casa decimais, entao voce vera algo como "x = 3.0000".
+
+var
+  pa, pb, co, cw, cn: vetor[1..11] de real
+  zr, zi: vetor[1..10] de real
+  gpa, gpb, gr: inteiro
+  opcao, idx: inteiro
+
+  // Le um polinomio: qual = 1 guarda em pa, qual = 2 guarda em pb
+
+procedimento LerPoli(qual: inteiro)
+  var
+    g, k: inteiro
+    v: real
+  inicio
+    repita
+      escreva("Grau do polinomio (1 a 10): ")
+      leia(g)
+    ate (g >= 1) e (g <= 10)
+    para k de 1 ate 11 faca
+      se qual = 1 entao
+        pa[k] <- 0
+      senao
+        pb[k] <- 0
+      fimse
+    fimpara
+    para k de g ate 0 passo -1 faca
+      repita
+        escreva("Coeficiente de x^", k, ": ")
+        leia(v)
+        se (k = g) e (v = 0) entao
+          escreval("   O coeficiente de maior grau nao pode ser zero.")
+        fimse
+      ate (k <> g) ou (v <> 0)
+      se qual = 1 entao
+        pa[k + 1] <- v
+      senao
+        pb[k + 1] <- v
+      fimse
+    fimpara
+    se qual = 1 entao
+      gpa <- g
+    senao
+      gpb <- g
+    fimse
+fimprocedimento
+
+     // Escreve o polinomio guardado em co (de grau "grau")
+
+procedimento MostrarPoli(grau: inteiro)
+  var
+    k: inteiro
+    c: real
+    primeiro: logico
+  inicio
+    primeiro <- verdadeiro
+    para k de grau ate 0 passo -1 faca
+      c <- co[k + 1]
+      se c <> 0 entao
+        se primeiro entao
+          se c < 0 entao
+            escreva("-")
+          fimse
+        senao
+          se c < 0 entao
+            escreva(" - ")
+          senao
+            escreva(" + ")
+          fimse
+        fimse
+        se (abs(c) <> 1) ou (k = 0) entao
+          escreva(abs(c))
+        fimse
+        se k >= 2 entao
+          escreva("x^", k)
+        fimse
+        se k = 1 entao
+          escreva("x")
+        fimse
+        primeiro <- falso
+      fimse
+    fimpara
+    escreval("")
+fimprocedimento
+
+// Multiplica pa (grau ga) por pb (grau gb); resultado em co, grau em gr
+
+procedimento Multiplicar(ga, gb: inteiro)
+  var
+    i, j: inteiro
+  inicio
+    gr <- ga + gb
+    para i de 1 ate 11 faca
+      co[i] <- 0
+    fimpara
+    para i de 0 ate ga faca
+      para j de 0 ate gb faca
+        co[i + j + 1] <- co[i + j + 1] + pa[i + 1] * pb[j + 1]
+      fimpara
+    fimpara
+fimprocedimento
+
+// Escreve uma raiz (parte real ra e parte imaginaria ia) com 4 casas
+procedimento ImprimirRaiz(ra, ia: real)
+  inicio
+    se abs(ra) < 0.00005 entao
+      ra <- 0
+    fimse
+    se abs(ia) < 0.0001 entao
+      escreval("   x = ", ra:1:4)
+    senao
+      se ia > 0 entao
+        escreval("   x = ", ra:1:4, " + ", ia:1:4, "i")
+      senao
+        escreval("   x = ", ra:1:4, " - ", abs(ia):1:4, "i")
+      fimse
+    fimse
+fimprocedimento
+
+// Acha e escreve todas as raizes do polinomio guardado em co
+
+procedimento Resolver(grau: inteiro)
+  var
+    n, k, i, j, it, nz: inteiro
+    raio, pig, pr, pim, dr, di, ar, ai, t, den, qr, qi, maxd, delta, x1, x2: real
+  inicio
+    pig <- 3.14159265358979
+    n <- grau
+    para k de 1 ate 11 faca
+      cw[k] <- co[k]
+    fimpara
+
+    // retira as raizes iguais a zero (termo independente nulo)
+
+    nz <- 0
+    enquanto (n > 0) e (cw[1] = 0) faca
+      para k de 1 ate n faca
+        cw[k] <- cw[k + 1]
+      fimpara
+      n <- n - 1
+      nz <- nz + 1
+    fimenquanto
+
+    escreval("")
+    escreval("Raizes (", grau, " no total):")
+    se nz > 0 entao
+      escreval("   x = 0   (raiz nula, repetida ", nz, " vez(es))")
+    fimse
+
+    // grau 1
+
+    se n = 1 entao
+      ImprimirRaiz((0 - cw[1]) / cw[2], 0)
+    fimse
+
+    // grau 2: formula de Bhaskara
+
+    se n = 2 entao
+      delta <- cw[2] * cw[2] - 4 * cw[3] * cw[1]
+      se delta >= 0 entao
+        x1 <- (0 - cw[2] - raizq(delta)) / (2 * cw[3])
+        x2 <- (0 - cw[2] + raizq(delta)) / (2 * cw[3])
+        ImprimirRaiz(x1, 0)
+        ImprimirRaiz(x2, 0)
+      senao
+        x1 <- (0 - cw[2]) / (2 * cw[3])
+        x2 <- abs(raizq(0 - delta) / (2 * cw[3]))
+        ImprimirRaiz(x1, 0 - x2)
+        ImprimirRaiz(x1, x2)
+      fimse
+    fimse
+
+    // grau 3 ou mais: Durand-Kerner
+
+    se n >= 3 entao
+      // deixa o polinomio monico (coeficiente de maior grau = 1)
+
+      para k de 1 ate n faca
+        cn[k] <- cw[k] / cw[n + 1]
+      fimpara
+
+      // chutes iniciais: pontos em uma circunferencia
+
+      raio <- 0
+      para k de 1 ate n faca
+        se abs(cn[k]) > raio entao
+          raio <- abs(cn[k])
+        fimse
+      fimpara
+      raio <- 1 + raio
+      para i de 1 ate n faca
+        zr[i] <- raio * cos(2 * pig * (i - 1) / n + 0.4)
+        zi[i] <- raio * sen(2 * pig * (i - 1) / n + 0.4)
+      fimpara
+
+      // iteracoes
+
+      it <- 0
+      repita
+        it <- it + 1
+        maxd <- 0
+        para i de 1 ate n faca
+
+          // valor do polinomio em z[i] (Horner com numeros complexos)
+
+          pr <- 1
+          pim <- 0
+          para k de n ate 1 passo -1 faca
+            t <- pr * zr[i] - pim * zi[i] + cn[k]
+            pim <- pr * zi[i] + pim * zr[i]
+            pr <- t
+          fimpara
+
+          // produto de (z[i] - z[j]) para j diferente de i
+
+          dr <- 1
+          di <- 0
+          para j de 1 ate n faca
+            se j <> i entao
+              ar <- zr[i] - zr[j]
+              ai <- zi[i] - zi[j]
+              t <- dr * ar - di * ai
+              di <- dr * ai + di * ar
+              dr <- t
+            fimse
+          fimpara
+          den <- dr * dr + di * di
+          se den = 0 entao
+            zr[i] <- zr[i] + 0.001
+          senao
+
+            // correcao = valor / produto (divisao complexa)
+
+            qr <- (pr * dr + pim * di) / den
+            qi <- (pim * dr - pr * di) / den
+            zr[i] <- zr[i] - qr
+            zi[i] <- zi[i] - qi
+            se abs(qr) + abs(qi) > maxd entao
+              maxd <- abs(qr) + abs(qi)
+            fimse
+          fimse
+        fimpara
+      ate (maxd < 0.000000000001) ou (it >= 3000)
+
+      // coloca as raizes em ordem crescente da parte real
+
+      para i de 1 ate n - 1 faca
+        para j de 1 ate n - i faca
+          se zr[j] > zr[j + 1] entao
+            t <- zr[j]
+            zr[j] <- zr[j + 1]
+            zr[j + 1] <- t
+            t <- zi[j]
+            zi[j] <- zi[j + 1]
+            zi[j + 1] <- t
+          fimse
+        fimpara
+      fimpara
+      para i de 1 ate n faca
+        ImprimirRaiz(zr[i], zi[i])
+      fimpara
+    fimse
+fimprocedimento
+
+inicio
+  opcao <- -1
+  enquanto opcao <> 0 faca
+    escreval("")
+    escreval("===== RAIZES DE POLINOMIOS =====")
+    escreval("1 - Achar as raizes de um polinomio")
+    escreval("2 - Multiplicar dois polinomios (p * q) e achar as raizes do produto")
+    escreval("0 - Sair")
+    escreva("Opcao: ")
+    leia(opcao)
+    se opcao = 1 entao
+      escreval("")
+      LerPoli(1)
+      gr <- gpa
+      para idx de 1 ate 11 faca
+        co[idx] <- pa[idx]
+      fimpara
+      escreval("")
+      escreva("Polinomio: ")
+      MostrarPoli(gr)
+      Resolver(gr)
+    fimse
+    se opcao = 2 entao
+      escreval("")
+      escreval("--- Primeiro polinomio (p) ---")
+      LerPoli(1)
+      escreval("--- Segundo polinomio (q) ---")
+      LerPoli(2)
+      se gpa + gpb > 10 entao
+        escreval("O produto passaria do grau 10. Use polinomios menores.")
+      senao
+        Multiplicar(gpa, gpb)
+        escreval("")
+        escreva("Polinomio resultante: ")
+        MostrarPoli(gr)
+        Resolver(gr)
+      fimse
+    fimse
+  fimenquanto
+  escreval("Fim.")
+fimalgoritmo
